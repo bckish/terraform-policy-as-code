@@ -6,9 +6,13 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
       - run: terraform -chdir=terraform init -backend=false
       - run: terraform -chdir=terraform fmt -check
       - run: terraform -chdir=terraform validate
+      - run: terraform -chdir=terraform test
+      - run: docker run --rm -v "$PWD/policy:/policy:ro" openpolicyagent/opa:1.22.4 test /policy -v
